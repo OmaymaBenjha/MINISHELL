@@ -40,11 +40,9 @@ t_command *parse(t_token *tokens)
 
     if (!tokens)
         return (NULL);
-
     cmds_count = get_piped_cmds_count(tokens);
     cmd_head = NULL;
     i = 0;
-
     while (i < cmds_count)
     {
         arg_index = 0;
@@ -54,12 +52,10 @@ t_command *parse(t_token *tokens)
         args = malloc(sizeof(char *) * (arg_count + 1));
         if (!args)
             return (NULL);
-
         while (tokens && tokens->type != TOKEN_PIPE)
         {
             if (tokens->type == TOKEN_ERROR)
                 return ( NULL);
-
             if (tokens->type == TOKEN_WORD)
             {
                 args[arg_index] = ft_strdup(tokens->value);
