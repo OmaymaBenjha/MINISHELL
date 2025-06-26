@@ -23,8 +23,12 @@ char    *ft_strdup(char *value)
 
 static char *strip_quotes(const char *str)
 {
-    int i = 0, j = 0;
-    char *cleaned = malloc(ft_strlen(str) + 1);
+    int i;
+    int j;
+    char    *cleaned;
+    i = 0;
+    j = 0;
+    cleaned = malloc(ft_strlen(str) + 1);
     if (!cleaned)
         return (NULL);
     while (str[i])
@@ -41,9 +45,10 @@ static char *strip_quotes(const char *str)
 
 static void clean_quotes_in_args(t_command *cmd)
 {
-    int i = 0;
+    int i;
     char *stripped;
 
+    i = 0;
     while (cmd->args && cmd->args[i])
     {
         stripped = strip_quotes(cmd->args[i]);
@@ -64,7 +69,6 @@ void remove_quotes_from_all_args(t_command *cmd_list)
         cmd_list = cmd_list->next_piped_command;
     }
 }
-
 
 void handle_heredocs(t_command *cmd_list)
 {

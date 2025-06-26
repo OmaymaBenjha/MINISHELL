@@ -23,7 +23,6 @@ static int get_args_per_cmd(t_token *tokens)
             args_count++;
         tokens = tokens->next;
     }
-    printf("args per cmd are: %d\n", args_count);
     return (args_count);
 }
 

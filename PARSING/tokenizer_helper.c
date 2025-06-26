@@ -38,6 +38,10 @@ t_token *scan_and_create_word(const char *input, int *pos_ptr, int input_len, in
     in_dquote = false;
     while (*pos_ptr < input_len)
     {
+        if (*pos_ptr == word_start && input[*pos_ptr] == '&')
+        {
+            printf("minishell: syntax error near unexpected token `&'")
+        }
         if (input[*pos_ptr] == '\'' && !in_dquote)
             in_squote = !in_squote;
         else if (input[*pos_ptr] == '"' && !in_squote)
