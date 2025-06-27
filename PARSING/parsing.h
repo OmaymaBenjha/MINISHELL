@@ -74,5 +74,6 @@ t_redir *new_redir(t_token_type type, t_token *next_token);
 void    add_redir_node(t_redir **redir_head, t_redir *new_node);
 void remove_quotes_from_all_args(t_command *cmd_list);
 void handle_heredocs(t_command *cmd_list);
+int	ft_strncmp(const char *s1, const char *s2, size_t n);
 
 #endif

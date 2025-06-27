@@ -34,9 +34,11 @@ int main(int argc, char **argv, char **envp)
 
             
             if (tokens) { 
-                
                 parsed_commands = parse(tokens); 
-              
+                if (!parsed_commands)
+                    printf("error\n");
+                else
+                    printf("alright\n");
                 handle_heredocs(parsed_commands); 
            
             //     // if (parsed_commands) {

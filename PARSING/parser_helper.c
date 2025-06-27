@@ -20,11 +20,14 @@ char    *ft_strdup(char *value)
     return (result);
 }
 
-
 static char *strip_quotes(const char *str)
 {
-    int i = 0, j = 0;
-    char *cleaned = malloc(ft_strlen(str) + 1);
+    int i;
+    int j;
+    char    *cleaned;
+    i = 0;
+    j = 0;
+    cleaned = malloc(ft_strlen(str) + 1);
     if (!cleaned)
         return (NULL);
     while (str[i])
@@ -41,9 +44,10 @@ static char *strip_quotes(const char *str)
 
 static void clean_quotes_in_args(t_command *cmd)
 {
-    int i = 0;
+    int i;
     char *stripped;
 
+    i = 0;
     while (cmd->args && cmd->args[i])
     {
         stripped = strip_quotes(cmd->args[i]);
@@ -65,14 +69,14 @@ void remove_quotes_from_all_args(t_command *cmd_list)
     }
 }
 
-
 void handle_heredocs(t_command *cmd_list)
 {
-    t_command *cmd = cmd_list;
-    t_redir *redir;
-    int pipefd[2];
-    char *line;
+    t_command   *cmd;
+    t_redir     *redir;
+    int         pipefd[2];
+    char        *line;
 
+    cmd = cmd_list;
     while (cmd)
     {
         redir = cmd->redirections;
@@ -81,28 +85,22 @@ void handle_heredocs(t_command *cmd_list)
             if (redir->type == REDIR_HEREDOC)
             {
                 if (pipe(pipefd) == -1)
-                {
-                    perror("pipe");
-                    exit(EXIT_FAILURE);
-                }
-
+                    (perror("pipe"), exit(EXIT_FAILURE));
                 while (1)
                 {
                     line = readline("> ");
                     if (!line)
                         break;
-
-                    if (strcmp(line, redir->delimiter_or_filename) == 0)
+                    if (ft_strncmp(line, redir->delimiter_or_filename, ft_strlen(line)) == 0)
                     {
                         free(line);
-                        break;
+                        break; 
                     }
-
-                    write(pipefd[1], line, strlen(line));
+                    
+                    write(pipefd[1], line, ft_strlen(line));
                     write(pipefd[1], "\n", 1);
                     free(line);
                 }
-
                 close(pipefd[1]); 
                 redir->fd = pipefd[0]; 
             }
