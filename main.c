@@ -19,12 +19,15 @@ int	main(int argc, char **argv, char **envp)
 		}
 		if (input_line[0] != '\0')
 		{
+			add_history(input_line);
 			tokens = tokenize(input_line);
 			if (tokens)
 			{
 				commands = parse(tokens);
 				if (commands)
 					executor(commands, envp);
+				// else 
+				// 	printf("error\n");
 				free_tokens(tokens);
 			}
 		}

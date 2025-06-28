@@ -25,7 +25,23 @@ static int get_args_per_cmd(t_token *tokens)
     }
     return (args_count);
 }
-
+static int detect_missing_redir_target(t_token *redir_token)
+{
+    if (!redir_token)
+        return 0;
+    if (!redir_token->next)
+    {
+        ft_putstr_fd("minishell: syntax error near unexpected token `newline'\n",2);
+        return 1;
+    }
+    if (redir_token->next->type != TOKEN_WORD)
+    {
+        dprintf(2, "minishell: syntax error near unexpected token `%s'\n", 
+                redir_token->next->value ? redir_token->next->value : "newline");
+        return 1;
+    }
+    return 0;
+}
 t_command *parse(t_token *tokens)
 {
     int         cmds_count;
@@ -40,6 +56,11 @@ t_command *parse(t_token *tokens)
 
     if (!tokens)
         return (NULL);
+    if (tokens->type == TOKEN_PIPE)
+    {
+        ft_putstr_fd("minishell: syntax error near unexpected token `|'\n", 2);
+        return (NULL);
+    }
     cmds_count = get_piped_cmds_count(tokens);
     cmd_head = NULL;
     i = 0;
@@ -54,8 +75,6 @@ t_command *parse(t_token *tokens)
             return (NULL);
         while (tokens && tokens->type != TOKEN_PIPE)
         {
-            if (tokens->type == TOKEN_ERROR)
-                return ( NULL);
             if (tokens->type == TOKEN_WORD)
             {
                 args[arg_index] = ft_strdup(tokens->value);
@@ -65,6 +84,8 @@ t_command *parse(t_token *tokens)
             }
             else
             {
+                if (detect_missing_redir_target(tokens))
+                    return NULL;
                 redir = new_redir(tokens->type, tokens->next);
                 if (!redir)
                     return ( NULL);
@@ -75,15 +96,9 @@ t_command *parse(t_token *tokens)
         }
         if (tokens && tokens->type == TOKEN_PIPE && tokens->next == NULL)
         {
-            printf("[ERROR] Pipe without following command\n");
+            ft_putstr_fd("minishell: Pipe without following command\n", 2);
             return (NULL);
         }
-        if (tokens && tokens->type == TOKEN_REDIR_HEREDOC && tokens->next == NULL)
-        {
-            printf("syntax error near unexpected token `newline'\n");
-            return (NULL);
-        }
-
         args[arg_index] = NULL;
         cmd_node = new_cmd_node(args, redir_head);
         if (!cmd_node)

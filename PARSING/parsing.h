@@ -8,7 +8,11 @@
 #include <unistd.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <signal.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
 typedef enum e_token_type
 {
     TOKEN_WORD,

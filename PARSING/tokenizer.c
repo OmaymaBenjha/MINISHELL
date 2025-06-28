@@ -2,9 +2,6 @@
 #include <unistd.h>
 #include <stdio.h>
 
-
-
-
 static t_token *try_tokenize_operator(const char *input, int *pos_ptr, int input_len)
 {
     t_token *new_node;
@@ -49,7 +46,7 @@ static t_token *get_next_token(const char *input, int *pos_ptr, int input_len, t
 
     if (skip_whitespace(input, pos_ptr, input_len))
         return (NULL);
-    new_node = try_tokenize_operator(input, pos_ptr, input_len);
+    new_node = try_tokenize_operator(input, pos_ptr, input_len); 
     if (new_node == NULL && *pos_ptr < input_len && input[*pos_ptr] != '|' && input[*pos_ptr] != '<' && input[*pos_ptr] != '>')
         new_node = tokenize_word_or_handle_error(input, pos_ptr, input_len, tokens_so_far_for_cleanup);
     if (new_node == NULL && *pos_ptr < input_len && (*tokens_so_far_for_cleanup != NULL || !skip_whitespace(input, pos_ptr, input_len)))

@@ -16,6 +16,20 @@ t_token *tokenize_word_or_handle_error(const char *input, int *pos_ptr, int inpu
 
     word_start = *pos_ptr;
     new_node = scan_and_create_word(input, pos_ptr, input_len, word_start, tokens_so_far_for_cleanup);
+
+    if (new_node && new_node->type == TOKEN_ERROR)
+    {
+        ft_putstr_fd("minishell: syntax error near unexpected character '", 2);
+        write(2, new_node->value, 1);
+        ft_putstr_fd("'\n", 2);
+        free_tokens(*tokens_so_far_for_cleanup);
+        *tokens_so_far_for_cleanup = NULL;
+        free(new_node->value);
+        free(new_node);
+        *pos_ptr = input_len; 
+        return NULL;
+    }
+
     if (new_node == NULL && *pos_ptr < input_len && *pos_ptr == word_start && !(*tokens_so_far_for_cleanup == NULL && *pos_ptr == input_len))
     {
         ft_putstr_fd("minishell: syntax error near unexpected character '", 2);
@@ -26,7 +40,14 @@ t_token *tokenize_word_or_handle_error(const char *input, int *pos_ptr, int inpu
         *pos_ptr = input_len;
         return (NULL);
     }
+
     return (new_node);
+}
+
+static bool is_special_character(char c)
+{
+    return (c == ';' || c == '\\' || c == '&' ||  c == ':'||
+            c == ')' || c == '(' || c == '{' || c == '}' || c == '*' || c == '[' || c == ']');
 }
 
 t_token *scan_and_create_word(const char *input, int *pos_ptr, int input_len, int word_start, t_token **tokens_so_far_for_cleanup)
@@ -46,6 +67,8 @@ t_token *scan_and_create_word(const char *input, int *pos_ptr, int input_len, in
                  (input[*pos_ptr] == '\t' || input[*pos_ptr] == ' ' ||
                   input[*pos_ptr] == '|' || input[*pos_ptr] == '<' || input[*pos_ptr] == '>'))
             break;
+        else if (!in_squote && !in_dquote && is_special_character(input[*pos_ptr]))
+            return new_token(TOKEN_ERROR, &input[*pos_ptr], 1);
         (*pos_ptr)++;
     }
     if (in_squote || in_dquote)
@@ -53,7 +76,6 @@ t_token *scan_and_create_word(const char *input, int *pos_ptr, int input_len, in
          if (handle_unclosed_quote_error(tokens_so_far_for_cleanup, pos_ptr, input_len))
             return (NULL);
     }
-       
     if (*pos_ptr > word_start)
         return (new_token(TOKEN_WORD, &input[word_start], *pos_ptr - word_start));
     return (NULL);

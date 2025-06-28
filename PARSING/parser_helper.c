@@ -69,14 +69,19 @@ void remove_quotes_from_all_args(t_command *cmd_list)
     }
 }
 
+
+static void sigint_heredoc_handler(int sig)
+{
+    (void)sig;
+    write(1, "\n", 1);
+    exit(1);
+}
+
 void handle_heredocs(t_command *cmd_list)
 {
-    t_command   *cmd;
+    t_command   *cmd = cmd_list;
     t_redir     *redir;
-    int         pipefd[2];
-    char        *line;
 
-    cmd = cmd_list;
     while (cmd)
     {
         redir = cmd->redirections;
@@ -84,25 +89,61 @@ void handle_heredocs(t_command *cmd_list)
         {
             if (redir->type == REDIR_HEREDOC)
             {
+                int pipefd[2];
                 if (pipe(pipefd) == -1)
-                    (perror("pipe"), exit(EXIT_FAILURE));
-                while (1)
                 {
-                    line = readline("> ");
-                    if (!line)
-                        break;
-                    if (ft_strncmp(line, redir->delimiter_or_filename, ft_strlen(line)) == 0)
-                    {
-                        free(line);
-                        break; 
-                    }
-                    
-                    write(pipefd[1], line, ft_strlen(line));
-                    write(pipefd[1], "\n", 1);
-                    free(line);
+                    perror("pipe");
+                    exit(EXIT_FAILURE);
                 }
-                close(pipefd[1]); 
-                redir->fd = pipefd[0]; 
+
+                pid_t pid = fork();
+                if (pid == -1)
+                {
+                    perror("fork");
+                    exit(EXIT_FAILURE);
+                }
+
+                if (pid == 0) 
+                {
+                    
+                    signal(SIGINT, sigint_heredoc_handler);
+                    signal(SIGQUIT, SIG_IGN);
+                    close(pipefd[0]);
+
+                    char *line;
+                    while (1)
+                    {
+                        line = readline("> ");
+                        if (!line || ft_strncmp(line, redir->delimiter_or_filename, ft_strlen(line)) == 0)
+                            break;
+                        write(pipefd[1], line, ft_strlen(line));
+                        write(pipefd[1], "\n", 1);
+                        free(line);
+                    }
+                    free(line);
+                    close(pipefd[1]);
+                    exit(0);
+                }
+                else 
+                {
+                    int status;
+
+                    signal(SIGINT, SIG_IGN);  
+                    waitpid(pid, &status, 0);
+                    signal(SIGINT, SIG_DFL);  
+
+                    close(pipefd[1]); 
+
+                    if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
+                    {
+                        close(pipefd[0]);
+                        redir->fd = -1;
+                        printf("\n[heredoc canceled]\n");
+                        return; 
+                    }
+
+                    redir->fd = pipefd[0]; 
+                }
             }
             redir = redir->next;
         }

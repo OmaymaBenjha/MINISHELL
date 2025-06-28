@@ -4,6 +4,7 @@
 t_token *new_token(t_token_type type, const char *value_start, int len)
 {
     t_token *token;
+    int     i;
 
     token = (t_token *)malloc(sizeof(t_token));
     if (!token)
@@ -11,12 +12,12 @@ t_token *new_token(t_token_type type, const char *value_start, int len)
     token->type = type;
     token->next = NULL;
     token->value = NULL;
+    i = 0;
     if (value_start && len > 0)
     {
         token->value = (char *)malloc(sizeof(char) * (len + 1));
         if (!token->value)
             return (free(token), NULL);
-        int i = 0;
         while (i < len)
         {
             token->value[i] = value_start[i];
