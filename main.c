@@ -24,14 +24,19 @@ int	main(int argc, char **argv, char **envp)
 			if (tokens)
 			{
 				commands = parse(tokens);
-				if (commands)
-					executor(commands, envp);
-				// else 
-				// 	printf("error\n");
+				if (!commands)
+				{
+					free_tokens(tokens);
+                    free(input_line);
+                    continue;
+				}
+				executor(commands, envp);
+				handle_heredocs(commands);
 				free_tokens(tokens);
 			}
 		}
 		free(input_line);
+		input_line = NULL;
 	}
 	return (0);
 }

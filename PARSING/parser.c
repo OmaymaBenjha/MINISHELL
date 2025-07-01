@@ -94,7 +94,7 @@ t_command *parse(t_token *tokens)
             }
             tokens = tokens->next;
         }
-        if (tokens && tokens->type == TOKEN_PIPE && tokens->next == NULL)
+        if (tokens && tokens->type == TOKEN_PIPE && (tokens->next == NULL || tokens->next->type == TOKEN_PIPE))
         {
             ft_putstr_fd("minishell: Pipe without following command\n", 2);
             return (NULL);

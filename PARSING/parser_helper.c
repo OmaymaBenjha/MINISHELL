@@ -20,27 +20,64 @@ char    *ft_strdup(char *value)
     return (result);
 }
 
-static char *strip_quotes(const char *str)
+static size_t count_stripped_len(const char *str)
 {
-    int i;
-    int j;
-    char    *cleaned;
-    i = 0;
-    j = 0;
-    cleaned = malloc(ft_strlen(str) + 1);
-    if (!cleaned)
-        return (NULL);
+    size_t i = 0;
+    size_t len = 0;
+    bool in_squote = false;
+    bool in_dquote = false;
+
     while (str[i])
     {
-        if (str[i] != '\'' && str[i] != '"')
+        if (str[i] == '\'' && !in_dquote)
         {
-            cleaned[j++] = str[i];
+            in_squote = !in_squote;
+            i++;
+            continue;
         }
+        else if (str[i] == '"' && !in_squote)
+        {
+            in_dquote = !in_dquote;
+            i++;
+            continue;
+        }
+        len++;
         i++;
     }
-    cleaned[j] = '\0';
-    return (cleaned);
+    return len;
 }
+
+static char *strip_quotes(const char *str)
+{
+    size_t i = 0, j = 0;
+    size_t new_len = count_stripped_len(str);
+    char *cleaned = malloc(new_len + 1);
+    bool in_squote = false;
+    bool in_dquote = false;
+
+    if (!cleaned)
+        return NULL;
+
+    while (str[i])
+    {
+        if (str[i] == '\'' && !in_dquote)
+        {
+            in_squote = !in_squote;
+            i++;
+            continue;
+        }
+        else if (str[i] == '"' && !in_squote)
+        {
+            in_dquote = !in_dquote;
+            i++;
+            continue;
+        }
+        cleaned[j++] = str[i++];
+    }
+    cleaned[j] = '\0';
+    return cleaned;
+}
+
 
 static void clean_quotes_in_args(t_command *cmd)
 {
@@ -114,7 +151,7 @@ void handle_heredocs(t_command *cmd_list)
                     while (1)
                     {
                         line = readline("> ");
-                        if (!line || ft_strncmp(line, redir->delimiter_or_filename, ft_strlen(line)) == 0)
+                        if (!line || ft_strncmp(line, redir->delimiter_or_filename, ft_strlen(redir->delimiter_or_filename)) == 0)
                             break;
                         write(pipefd[1], line, ft_strlen(line));
                         write(pipefd[1], "\n", 1);
